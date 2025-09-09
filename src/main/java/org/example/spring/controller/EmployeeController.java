@@ -9,7 +9,7 @@ import java.util.*;
 
 @RestController
 public class EmployeeController {
-    private List<Employee> employees = new ArrayList<Employee>();
+    private final List<Employee> employees = new ArrayList<>();
 
     @PostMapping("/employees")
     public Employee createEmployee(@RequestBody Employee employee) {
