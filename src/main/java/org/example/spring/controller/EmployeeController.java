@@ -34,9 +34,29 @@ public class EmployeeController {
     }
 
     @GetMapping("/employees")
-    public List<Employee> getEmployeesByGender (@RequestParam String gender){
-        return employees.stream().filter(employee -> Objects.equals(employee.getGender(), gender)).toList();
+    public List<Employee> getEmployees(
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        // 先过滤
+        List<Employee> filteredEmployees = employees.stream()
+                .filter(e -> gender == null || Objects.equals(e.getGender(), gender))
+                .toList();
+
+        if (page == null || size == null) {
+            return filteredEmployees;
+        }
+
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
+        // 分页逻辑
+        int from = (page - 1) * size;
+        if (from >= filteredEmployees.size()) return List.of();
+        int to = Math.min(from + size, filteredEmployees.size());
+        return filteredEmployees.subList(from, to);
     }
+
     @PutMapping("/employees/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee){
         Employee employeeToUpdate = employees.stream()

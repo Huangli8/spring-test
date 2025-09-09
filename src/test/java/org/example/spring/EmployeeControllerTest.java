@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.web.servlet.function.RequestPredicates.param;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -147,4 +148,78 @@ public class EmployeeControllerTest {
         mockMvc.perform(delete("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
 
     }
+
+    @Test
+    void should_get_all_employees_when_no_filter_given() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":30,
+                   "gender":"MALE",
+                   "salary":5000
+                }
+                """;
+        ;
+        String requestBody2 = """
+                {
+                   "name": "May",
+                   "age":25,
+                   "gender":"FEMALE",
+                   "salary":7000
+                }
+                """;
+        ;
+        String requestBody3 = """
+                {
+                   "name": "Tim",
+                   "age":29,
+                   "gender":"MALE",
+                   "salary":8000
+                }
+                """;
+        ;
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody2)).andExpect(status().isCreated());
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody3)).andExpect(status().isCreated());
+        mockMvc.perform(get("/employees").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].name").value("John"))
+                .andExpect(jsonPath("$[0].age").value(30))
+                .andExpect(jsonPath("$[0].gender").value("MALE"))
+                .andExpect(jsonPath("$[0].salary").value(5000))
+                .andExpect(jsonPath("$[1].name").value("May"))
+                .andExpect(jsonPath("$[1].age").value(25))
+                .andExpect(jsonPath("$[1].gender").value("FEMALE"))
+                .andExpect(jsonPath("$[1].salary").value(7000))
+                .andExpect(jsonPath("$[2].name").value("Tim"))
+                .andExpect(jsonPath("$[2].age").value(29))
+                .andExpect(jsonPath("$[2].gender").value("MALE"))
+                .andExpect(jsonPath("$[2].salary").value(8000));
+
+    }
+
+    @Test
+    void should_get_employees_with_pagination_when_given_page_and_size() throws Exception {
+        for (int i = 0; i < 6; i++) {
+            String requestBody = """
+                    {"name":"Employee%1$d","age":%2$d,"gender":"MALE","salary":%3$d}""".formatted(i + 1, 20 + i, 5000 + i * 1000);
+            mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
+        }
+        //返回第二页的内容，即第三第四条
+        mockMvc.perform(get("/employees")
+                .param("page", "2")
+                .param("size", "2").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$",hasSize(2)))
+                .andExpect(jsonPath("$[0].name").value("Employee3"))
+                .andExpect(jsonPath("$[0].age").value(22))
+                .andExpect(jsonPath("$[0].gender").value("MALE"))
+                .andExpect(jsonPath("$[0].salary").value(7000))
+                .andExpect(jsonPath("$[1].name").value("Employee4"))
+                .andExpect(jsonPath("$[1].age").value(23))
+                .andExpect(jsonPath("$[1].gender").value("MALE"))
+                .andExpect(jsonPath("$[1].salary").value(8000));
+    }
+
 }
