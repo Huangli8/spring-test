@@ -27,11 +27,28 @@ public class EmployeeController {
 
     @GetMapping("/employees/{id}")
     public Employee getEmployeeById(@PathVariable long id){
-        return employees.stream().filter(employee-> employee.getId() == id).findFirst().orElse(null);
+        return employees.stream()
+                .filter(employee-> employee.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
     @GetMapping("/employees")
     public List<Employee> getEmployeesByGender (@RequestParam String gender){
         return employees.stream().filter(employee -> Objects.equals(employee.getGender(), gender)).toList();
+    }
+    @PutMapping("/employees/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee){
+        Employee employeeToUpdate = employees.stream()
+                .filter(e-> e.getId() == id)
+                .findFirst()
+                .orElse(null);
+        if(employeeToUpdate != null){
+            employeeToUpdate.setName(employee.getName());
+            employeeToUpdate.setAge(employee.getAge());
+            employeeToUpdate.setSalary(employee.getSalary());
+            employeeToUpdate.setGender(employee.getGender());
+        }
+        return ResponseEntity.ok(employeeToUpdate);
     }
 }
