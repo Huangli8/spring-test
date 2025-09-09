@@ -40,4 +40,26 @@ public class EmployeeControllerTest {
 
     }
 
+    @Test
+    void should_get_employee_when_given_a_valid_id() throws Exception{
+        String requestBody = """
+        {
+           "name": "John",
+           "age":30,
+           "gender":"MALE",
+           "salary":5000
+        }
+        """
+                ;
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
+        mockMvc.perform(get("/employees/{id}",1).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("John"))
+                .andExpect(jsonPath("$.age").value(30))
+                .andExpect(jsonPath("$.gender").value("MALE"))
+                .andExpect(jsonPath("$.salary").value(5000));
+    }
+
+
 }
