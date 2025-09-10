@@ -302,7 +302,30 @@ public class EmployeeControllerTest {
                    "activeStatus": false
                 }
                 """;
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
         mockMvc.perform(delete("/employees/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isOk());
+        mockMvc.perform(delete("/employees/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isBadRequest());
+    }
+    @Test
+    void should_get_bad_request_when_update_employee_inactive() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":20,
+                   "gender":"MALE",
+                   "salary":19999,
+                   "activeStatus": false
+                }
+                """;
+        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
+        mockMvc.perform(delete("/employees/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isOk());
+        mockMvc.perform(put("/employees/{id}",1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody1)).andExpect(status().isBadRequest());
     }

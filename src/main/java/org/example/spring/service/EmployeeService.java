@@ -60,10 +60,12 @@ public class EmployeeService {
         return employeeRepository.update(id,employee);
     }
     public Employee deleteEmployee(long id) {
-        Employee employee = getEmployee(id);
-        if(!employee.isActiveStatus()){
-            throw new EmployeeAlreadyDeletedException();
+        Employee employeeToUpdate = employeeRepository.findById(id);
+        if(employeeToUpdate == null){
+            throw new EmployeeNotFoundException("Employee with id=%d is not found".formatted(id));
         }
+        if(!employeeToUpdate.isActiveStatus())
+            throw new InactiveEmployeeUpdateException();
         return employeeRepository.delete(id);
     }
 
