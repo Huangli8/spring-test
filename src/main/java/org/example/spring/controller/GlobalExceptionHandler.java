@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmployeeSalaryToLowException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleEmployeeSalaryToLowException(EmployeeSalaryToLowException e) {
         return e.getMessage();
     }
@@ -28,13 +28,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmployeeNotAmongLegalAgeException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleEmployeeNotAmongLegalAgeException(EmployeeNotAmongLegalAgeException e) {
         return e.getMessage();
     }
 
     @ExceptionHandler(InactiveEmployeeUpdateException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleInactiveEmployeeUpdateException(InactiveEmployeeUpdateException e) {
         return e.getMessage();
     }
