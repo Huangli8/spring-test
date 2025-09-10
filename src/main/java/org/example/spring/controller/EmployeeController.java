@@ -25,14 +25,22 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees1")
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Employee> createEmployee1(@RequestBody Employee employee) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.createEmployee(employee));
+        try{
+            employeeService.createEmployee(employee);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
     @GetMapping("/employees/{id}")
-    public Employee getEmployeeById(@PathVariable long id){
-        return employeeService.getEmployee(id);
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable long id){
+        try{
+            return ResponseEntity.ok(employeeService.getEmployee(id));
+        }catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/employees")

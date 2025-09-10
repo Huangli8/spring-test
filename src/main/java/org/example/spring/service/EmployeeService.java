@@ -1,5 +1,8 @@
 package org.example.spring.service;
 
+import org.example.spring.Exception.EmployeeNotAmongLegalAgeException;
+import org.example.spring.Exception.EmployeeNotFoundException;
+import org.example.spring.Exception.EmployeeSalaryToLowException;
 import org.example.spring.entity.Employee;
 import org.example.spring.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +21,22 @@ public class EmployeeService {
     }
 
     public Employee createEmployee(@RequestBody Employee employee) {
+        if(employee.getAge()<18||employee.getAge()>65)
+            throw new EmployeeNotAmongLegalAgeException();
+        if(employee.getAge()>30 && employee.getSalary()<20000)
+            throw new EmployeeSalaryToLowException();
         employee.setId(employeeRepository.getSize()+1);
+        employee.setActiveStatus(true);
         employeeRepository.save(employee);
         return employee;
     }
 
     public Employee getEmployee(long id) {
-        return employeeRepository.findById(id);
+        Employee employee = employeeRepository.findById(id);
+        if(employee == null){
+            throw new EmployeeNotFoundException("Employee with id=%d is not found".formatted(id));
+        }
+        return employee;
     }
     public List<Employee> getEmployees(String gender, Integer page, Integer size) {
         List<Employee> employees = (gender==null)? employeeRepository.findAll() : employeeRepository.findByGender(gender);
@@ -53,4 +65,5 @@ public class EmployeeService {
     public boolean deleteEmployee(long id) {
         return employeeRepository.delete(id);
     }
+
 }

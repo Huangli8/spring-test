@@ -3,10 +3,12 @@ package org.example.spring;
 import org.example.spring.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -48,7 +50,8 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.age").value(30))
                 .andExpect(jsonPath("$.gender").value("MALE"))
-                .andExpect(jsonPath("$.salary").value(5000));
+                .andExpect(jsonPath("$.salary").value(5000))
+                .andExpect(jsonPath("$.activeStatus").value(true));
 
     }
 
@@ -232,4 +235,52 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("$[1].salary").value(8000));
     }
 
+    @Test
+    void should_get_bad_request_when_create_given_employee_under_18() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":17,
+                   "gender":"MALE",
+                   "salary":5000
+                }
+                """;
+        mockMvc.perform(post("/employees1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isBadRequest());
+    }
+    @Test
+    void should_get_bad_request_when_create_given_employee_upper_65() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":66,
+                   "gender":"MALE",
+                   "salary":5000
+                }
+                """;
+        mockMvc.perform(post("/employees1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isBadRequest());
+    }
+    @Test
+    void should_get_not_found_when_given_a_invalid_id() throws Exception {
+        mockMvc.perform(get("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void should_get_bad_request_when_create_given_employee_over_30_salary_under_20000() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":31,
+                   "gender":"MALE",
+                   "salary":19999
+                }
+                """;
+        mockMvc.perform(post("/employees1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isBadRequest());
+    }
 }
