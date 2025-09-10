@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public class CompanyRepository {
     private final List<Company> companies = new ArrayList<>();
-    public void addCompany(Company company) {
+    public void save(Company company) {
         companies.add(company);
     }
 
@@ -17,22 +17,22 @@ public class CompanyRepository {
         return companies.size();
     }
 
-    public Company getCompanyById(long id) {
+    public Company findById(long id) {
         return companies.stream()
                 .filter(company-> company.getId() == id)
                 .findFirst()
                 .orElse(null);
     }
 
-    public List<Company> getAllCompanies() {
+    public List<Company> findAll() {
         return companies;
     }
 
-    public boolean deleteCompanyById(long id) {
+    public boolean delete(long id) {
         return companies.removeIf(company-> company.getId() == id);
     }
 
-    public void clearEmployees() {
+    public void deleteAll() {
         companies.clear();
     }
 }

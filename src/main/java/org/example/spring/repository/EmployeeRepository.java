@@ -11,7 +11,7 @@ import java.util.Objects;
 public class EmployeeRepository {
     private final List<Employee> employees = new ArrayList<>();
 
-    public void addEmployee(Employee employee) {
+    public void save(Employee employee) {
         employees.add(employee);
     }
 
@@ -19,26 +19,26 @@ public class EmployeeRepository {
         return employees.size();
     }
 
-    public Employee getEmployeeById(long id) {
+    public Employee findById(long id) {
         return employees.stream()
                 .filter(employee-> employee.getId() == id)
                 .findFirst()
                 .orElse(null);
     }
 
-    public List<Employee> getEmployeesByGender(String gender) {
+    public List<Employee> findByGender(String gender) {
         return employees.stream().filter(employee -> Objects.equals(employee.getGender(),gender)).toList();
     }
 
-    public List<Employee> getAllEmployees() {
+    public List<Employee> findAll() {
         return employees;
     }
 
-    public boolean deleteEmployeeById(long id) {
+    public boolean delete(long id) {
         return employees.removeIf(employee-> employee.getId() == id);
     }
 
-    public void clearEmployees() {
+    public void deleteAll() {
         employees.clear();
     }
 

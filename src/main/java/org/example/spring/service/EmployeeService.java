@@ -5,7 +5,6 @@ import org.example.spring.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -20,15 +19,15 @@ public class EmployeeService {
 
     public Employee createEmployee(@RequestBody Employee employee) {
         employee.setId(employeeRepository.getSize()+1);
-        employeeRepository.addEmployee(employee);
+        employeeRepository.save(employee);
         return employee;
     }
 
     public Employee getEmployee(long id) {
-        return employeeRepository.getEmployeeById(id);
+        return employeeRepository.findById(id);
     }
     public List<Employee> getEmployees(String gender, Integer page, Integer size) {
-        List<Employee> employees = (gender==null)? employeeRepository.getAllEmployees() : employeeRepository.getEmployeesByGender(gender);
+        List<Employee> employees = (gender==null)? employeeRepository.findAll() : employeeRepository.findByGender(gender);
         if (page == null || size == null) {
             return employees;
         }
@@ -42,7 +41,7 @@ public class EmployeeService {
 
     }
     public Employee updateEmployee(long id ,Employee employee) {
-        Employee employeeToUpdate = employeeRepository.getEmployeeById(id);
+        Employee employeeToUpdate = employeeRepository.findById(id);
         if(employeeToUpdate != null){
             employeeToUpdate.setName(employee.getName());
             employeeToUpdate.setAge(employee.getAge());
@@ -52,6 +51,6 @@ public class EmployeeService {
         return employeeToUpdate;
     }
     public boolean deleteEmployee(long id) {
-        return employeeRepository.deleteEmployeeById(id);
+        return employeeRepository.delete(id);
     }
 }

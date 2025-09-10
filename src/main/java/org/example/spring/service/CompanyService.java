@@ -4,7 +4,6 @@ import org.example.spring.entity.Company;
 import org.example.spring.repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class CompanyService {
     }
 
     public List<Company> getCompanies(Integer page, Integer size){
-        List<Company> companies = companyRepository.getAllCompanies();
+        List<Company> companies = companyRepository.findAll();
         if(page == null && size == null){ return companies; }
 
         if (page < 1) page = 1;
@@ -31,16 +30,16 @@ public class CompanyService {
     }
 
     public Company getCompany(long id){
-        return companyRepository.getCompanyById(id);
+        return companyRepository.findById(id);
     }
 
     public Company createCompany(Company company){
         company.setId(companyRepository.getSize()+1);
-        companyRepository.addCompany(company);
+        companyRepository.save(company);
         return company;
     }
     public Company updateCompany(long id, Company company){
-        Company companyToUpdate = companyRepository.getCompanyById(id);
+        Company companyToUpdate = companyRepository.findById(id);
         if(companyToUpdate!=null){
             companyToUpdate.setName(company.getName());
         }
@@ -48,6 +47,6 @@ public class CompanyService {
     }
 
     public boolean deleteCompany(long id){
-        return companyRepository.deleteCompanyById(id);
+        return companyRepository.delete(id);
     }
 }
