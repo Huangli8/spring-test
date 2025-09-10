@@ -55,7 +55,7 @@ class EmployeeServiceTest {
         employee.setName("Tim");
         employee.setSalary(3000);
 
-        when(employeeService.getEmployee(1)).thenReturn(employee);
+        when(employeeRepository.findById(1)).thenReturn(employee);
         Employee returnEmployee = employeeService.getEmployee(1);
 
         assertEquals(employee.getName(),returnEmployee.getName());
