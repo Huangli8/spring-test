@@ -1,5 +1,7 @@
 package org.example.spring;
 
+import org.example.spring.repository.EmployeeRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +21,18 @@ import static org.springframework.web.servlet.function.RequestPredicates.param;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class EmployeeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    
+    @BeforeEach
+    void setUp() throws Exception {
+        employeeRepository.clearEmployees();
+    }
     @Test
     void should_create_employee_when_given_a_valid_body() throws Exception {
         String requestBody = """

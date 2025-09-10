@@ -1,5 +1,7 @@
 package org.example.spring;
 
+import org.example.spring.repository.CompanyRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,10 +18,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CompanyControllerTest {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        companyRepository.clearEmployees();
+    }
 
     @Test
     void should_create_company_when_given_a_valid_body() throws Exception {

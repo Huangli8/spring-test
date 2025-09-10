@@ -1,36 +1,39 @@
 package org.example.spring.controller;
 
 import org.example.spring.entity.Employee;
+import org.example.spring.repository.EmployeeRepository;
+import org.example.spring.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
 public class EmployeeController {
-    private final List<Employee> employees = new ArrayList<>();
+    private final EmployeeService employeeService;
+
+    @Autowired
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
 
     @PostMapping("/employees")
     public Employee createEmployee(@RequestBody Employee employee) {
-        employee.setId(employees.size()+1);
-        employees.add(employee);
-        return employee;
+        return employeeService.createEmployee(employee);
     }
 
     @PostMapping("/employees1")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Employee> createEmployee1(@RequestBody Employee employee) {
-        employee.setId(employees.size()+1);
-        employees.add(employee);
-        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.createEmployee(employee));
     }
 
     @GetMapping("/employees/{id}")
     public Employee getEmployeeById(@PathVariable long id){
-        return employees.stream()
-                .filter(employee-> employee.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return employeeService.getEmployee(id);
     }
 
     @GetMapping("/employees")
@@ -39,43 +42,17 @@ public class EmployeeController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        // 先过滤
-        List<Employee> filteredEmployees = employees.stream()
-                .filter(e -> gender == null || Objects.equals(e.getGender(), gender))
-                .toList();
-
-        if (page == null || size == null) {
-            return filteredEmployees;
-        }
-
-        if (page < 1) page = 1;
-        if (size < 1) size = 10;
-        // 分页逻辑
-        int from = (page - 1) * size;
-        if (from >= filteredEmployees.size()) return List.of();
-        int to = Math.min(from + size, filteredEmployees.size());
-        return filteredEmployees.subList(from, to);
+        return employeeService.getEmployees(gender, page, size);
     }
 
     @PutMapping("/employees/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee){
-        Employee employeeToUpdate = employees.stream()
-                .filter(e-> e.getId() == id)
-                .findFirst()
-                .orElse(null);
-        if(employeeToUpdate != null){
-            employeeToUpdate.setName(employee.getName());
-            employeeToUpdate.setAge(employee.getAge());
-            employeeToUpdate.setSalary(employee.getSalary());
-            employeeToUpdate.setGender(employee.getGender());
-        }
-        return ResponseEntity.ok(employeeToUpdate);
+        return ResponseEntity.ok(employeeService.updateEmployee(id, employee));
     }
 
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable long id){
-        boolean removed = employees.removeIf(employee -> employee.getId() == id);
-        return removed? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return employeeService.deleteEmployee(id)? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
 }
