@@ -68,8 +68,17 @@ class EmployeeServiceTest {
 
     @Test
     void should_return_not_found_exception_when_given_not_exist_id(){
+        Employee employee = new Employee();
+        employee.setId(1);
+        employee.setAge(22);
+        employee.setGender("MALE");
+        employee.setName("Tim");
+        employee.setSalary(3000);
+
         assertThrows(EmployeeNotFoundException.class,()->employeeService.getEmployee(1));
-        verify(employeeRepository, times(1)).findById(1);
+        assertThrows(EmployeeNotFoundException.class,()->employeeService.deleteEmployee(1));
+        assertThrows(EmployeeNotFoundException.class,()->employeeService.updateEmployee(1,employee));
+        verify(employeeRepository, times(3)).findById(1);
     }
 
     @Test
@@ -116,6 +125,7 @@ class EmployeeServiceTest {
         assertThrows(EmployeeAlreadyDeletedException.class,()->employeeService.deleteEmployee(1));
 
     }
+
     @Test
     void should_not_update_when_given_employee_inactive(){
         Employee employee = new Employee();
