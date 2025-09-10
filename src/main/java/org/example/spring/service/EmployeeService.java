@@ -1,5 +1,6 @@
 package org.example.spring.service;
 
+import org.example.spring.Exception.EmployeeAlreadyDeletedException;
 import org.example.spring.Exception.EmployeeNotAmongLegalAgeException;
 import org.example.spring.Exception.EmployeeNotFoundException;
 import org.example.spring.Exception.EmployeeSalaryToLowException;
@@ -25,8 +26,7 @@ public class EmployeeService {
             throw new EmployeeNotAmongLegalAgeException();
         if(employee.getAge()>30 && employee.getSalary()<20000)
             throw new EmployeeSalaryToLowException();
-        employee.setId(employeeRepository.getSize()+1);
-        employee.setActiveStatus(true);
+
         employeeRepository.save(employee);
         return employee;
     }
@@ -62,7 +62,11 @@ public class EmployeeService {
         }
         return employeeToUpdate;
     }
-    public boolean deleteEmployee(long id) {
+    public Employee deleteEmployee(long id) {
+        Employee employee = getEmployee(id);
+        if(!employee.isActiveStatus()){
+            throw new EmployeeAlreadyDeletedException();
+        }
         return employeeRepository.delete(id);
     }
 

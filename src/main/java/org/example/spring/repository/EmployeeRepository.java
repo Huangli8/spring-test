@@ -12,30 +12,36 @@ public class EmployeeRepository {
     private final List<Employee> employees = new ArrayList<>();
 
     public void save(Employee employee) {
+        employee.setId(employees.size() + 1);
+        employee.setActiveStatus(true);
         employees.add(employee);
     }
 
-    public int getSize(){
+    public int getSize() {
         return employees.size();
     }
 
     public Employee findById(long id) {
         return employees.stream()
-                .filter(employee-> employee.getId() == id)
+                .filter(employee -> employee.getId() == id)
                 .findFirst()
                 .orElse(null);
     }
 
     public List<Employee> findByGender(String gender) {
-        return employees.stream().filter(employee -> Objects.equals(employee.getGender(),gender)).toList();
+        return employees.stream().filter(employee -> Objects.equals(employee.getGender(), gender)).toList();
     }
 
     public List<Employee> findAll() {
         return employees;
     }
 
-    public boolean delete(long id) {
-        return employees.removeIf(employee-> employee.getId() == id);
+    public Employee delete(long id) {
+        Employee employee = findById(id);
+        if (employee != null) {
+            employee.setActiveStatus(false);
+        }
+        return employee;
     }
 
     public void deleteAll() {
