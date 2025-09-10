@@ -102,33 +102,41 @@ class EmployeeServiceTest {
 //        verify(employeeRepository, times(1)).save(any());
 //    }
 
-//    @Test
-//    void should_not_delete_when_given_employee_already_inactive(){
-//        Employee employee = new Employee();
-//        employee.setId(1);
-//        employee.setAge(22);
-//        employee.setGender("MALE");
-//        employee.setName("Tim");
-//        employee.setSalary(3000);
-//        employee.setActiveStatus(false);
-//
-//        when(employeeService.deleteEmployee(1)).thenReturn(employee);
-//        assertThrows(EmployeeAlreadyDeletedException.class,()->employeeService.deleteEmployee(1));
-//
-//    }
-//    @Test
-//    void should_not_update_when_given_employee_inactive(){
-//        Employee employee = new Employee();
-//        employee.setId(1);
-//        employee.setAge(22);
-//        employee.setGender("MALE");
-//        employee.setName("Tim");
-//        employee.setSalary(3000);
-//        employee.setActiveStatus(false);
-//
-//        assertThrows(InactiveEmployeeUpdateException.class,()->employeeService.updateEmployee(1,employee));
-//        verify(employeeRepository, never()).update(any(),any());
-//
-//    }
+    @Test
+    void should_not_delete_when_given_employee_already_inactive(){
+        Employee employee = new Employee();
+        employee.setId(1);
+        employee.setAge(22);
+        employee.setGender("MALE");
+        employee.setName("Tim");
+        employee.setSalary(3000);
+        employee.setActiveStatus(false);
+
+        when(employeeRepository.findById(1)).thenReturn(employee);
+        assertThrows(EmployeeAlreadyDeletedException.class,()->employeeService.deleteEmployee(1));
+
+    }
+    @Test
+    void should_not_update_when_given_employee_inactive(){
+        Employee employee = new Employee();
+        employee.setId(1);
+        employee.setAge(22);
+        employee.setGender("MALE");
+        employee.setName("Tim");
+        employee.setSalary(3000);
+
+        Employee employeeToUpdated = new Employee();
+        employeeToUpdated.setId(1);
+        employeeToUpdated.setAge(23);
+        employeeToUpdated.setGender("MALE");
+        employeeToUpdated.setName("Tim");
+        employeeToUpdated.setSalary(4000);
+        employee.setActiveStatus(false);
+
+        when(employeeRepository.findById(1)).thenReturn(employeeToUpdated);
+        assertThrows(InactiveEmployeeUpdateException.class,()->employeeService.updateEmployee(1,employee));
+        verify(employeeRepository, never()).update(1,employee);
+
+    }
 
 }

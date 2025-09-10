@@ -65,7 +65,7 @@ public class EmployeeService {
             throw new EmployeeNotFoundException("Employee with id=%d is not found".formatted(id));
         }
         if(!employeeToUpdate.isActiveStatus())
-            throw new InactiveEmployeeUpdateException();
+            throw new EmployeeAlreadyDeletedException();
         return employeeRepository.delete(id);
     }
 
