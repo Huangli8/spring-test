@@ -290,4 +290,22 @@ public class EmployeeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody1)).andExpect(status().isBadRequest());
     }
+
+    @Test
+    void should_get_bad_request_when_delete_employee_already_delete() throws Exception {
+        String requestBody1 = """
+                {
+                   "name": "John",
+                   "age":20,
+                   "gender":"MALE",
+                   "salary":19999,
+                   "activeStatus": false
+                }
+                """;
+        mockMvc.perform(delete("/employees/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody1)).andExpect(status().isBadRequest());
+    }
+
+
 }

@@ -1,9 +1,6 @@
 package org.example.spring.service;
 
-import org.example.spring.Exception.EmployeeAlreadyDeletedException;
-import org.example.spring.Exception.EmployeeNotAmongLegalAgeException;
-import org.example.spring.Exception.EmployeeNotFoundException;
-import org.example.spring.Exception.EmployeeSalaryToLowException;
+import org.example.spring.Exception.*;
 import org.example.spring.entity.Employee;
 import org.example.spring.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +51,13 @@ public class EmployeeService {
     }
     public Employee updateEmployee(long id ,Employee employee) {
         Employee employeeToUpdate = employeeRepository.findById(id);
-        if(employeeToUpdate != null){
-            employeeToUpdate.setName(employee.getName());
-            employeeToUpdate.setAge(employee.getAge());
-            employeeToUpdate.setSalary(employee.getSalary());
-            employeeToUpdate.setGender(employee.getGender());
+        if(employeeToUpdate == null){
+            throw new EmployeeNotFoundException("Employee with id=%d is not found".formatted(id));
         }
-        return employeeToUpdate;
+        if(!employeeToUpdate.isActiveStatus())
+            throw new InactiveEmployeeUpdateException();
+
+        return employeeRepository.update(id,employee);
     }
     public Employee deleteEmployee(long id) {
         Employee employee = getEmployee(id);

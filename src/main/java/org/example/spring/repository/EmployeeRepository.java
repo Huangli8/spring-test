@@ -48,4 +48,14 @@ public class EmployeeRepository {
         employees.clear();
     }
 
+    public Employee update(long id, Employee employee) {
+        Employee employeeToUpdate = findById(id);
+        if (employeeToUpdate != null) {
+            employeeToUpdate.setName(employee.getName());
+            employeeToUpdate.setAge(employee.getAge());
+            employeeToUpdate.setSalary(employee.getSalary());
+            employeeToUpdate.setGender(employee.getGender());
+        }
+        return employeeToUpdate;
+    }
 }
