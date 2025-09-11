@@ -13,7 +13,7 @@ public class Employee {
     private String gender;
 
     @Column(name = "active_status", columnDefinition = "TINYINT")
-    private Integer activeStatus;
+    private Integer activeStatus=1;
 
     @Column(name = "company_id")
     private Long companyId;

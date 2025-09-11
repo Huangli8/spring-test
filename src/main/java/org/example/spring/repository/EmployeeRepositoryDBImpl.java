@@ -3,6 +3,8 @@ package org.example.spring.repository;
 import org.example.spring.entity.Employee;
 import org.example.spring.repository.dao.EmployeeJPARepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,6 +24,11 @@ public class EmployeeRepositoryDBImpl implements EmployeeRepository {
     @Override
     public Optional<Employee> findById(long id) {
         return employeeJPARepository.findById(id);
+    }
+
+    @Override
+    public Page<Employee> findAllPagination(Pageable pageable) {
+        return employeeJPARepository.findAll(pageable);
     }
 
     @Override
