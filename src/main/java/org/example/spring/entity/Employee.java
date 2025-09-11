@@ -1,18 +1,26 @@
 package org.example.spring.entity;
 
-public class Employee {
-    private long id;
-    private String name;
-    private int age;
-    private double salary;
-    private String gender;
-    private boolean activeStatus;
+import jakarta.persistence.*;
 
-    public long getId() {
+@Entity
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private Integer age;
+    private Double salary;
+    private String gender;
+    private Integer activeStatus;
+
+    @Column(name = "company_id")
+    private Long companyId;
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -24,19 +32,19 @@ public class Employee {
         this.name = name;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
-    public double getSalary() {
+    public Double getSalary() {
         return salary;
     }
 
-    public void setSalary(double salary) {
+    public void setSalary(Double salary) {
         this.salary = salary;
     }
 
@@ -48,11 +56,19 @@ public class Employee {
         this.gender = gender;
     }
 
-    public boolean isActiveStatus() {
+    public Integer getActiveStatus() {
         return activeStatus;
     }
 
-    public void setActiveStatus(boolean activeStatus) {
+    public void setActiveStatus(Integer activeStatus) {
         this.activeStatus = activeStatus;
+    }
+
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 }

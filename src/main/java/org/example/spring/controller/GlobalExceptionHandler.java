@@ -39,5 +39,13 @@ public class GlobalExceptionHandler {
         return e.getMessage();
     }
 
+    @ExceptionHandler(EmployeeAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleEmployeeAlreadyExistsException(EmployeeAlreadyExistsException e) {
+        e.printStackTrace();
+        return e.getMessage();
+    }
+
+
 
 }

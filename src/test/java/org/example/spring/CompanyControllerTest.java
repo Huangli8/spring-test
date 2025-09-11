@@ -1,12 +1,22 @@
 package org.example.spring;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.spring.entity.Company;
+import org.example.spring.entity.Employee;
 import org.example.spring.repository.CompanyRepository;
+import org.example.spring.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -24,9 +34,13 @@ public class CompanyControllerTest {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @BeforeEach
     void setUp() throws Exception {
         companyRepository.deleteAll();
+        employeeRepository.deleteAll();
     }
 
     @Test
@@ -38,22 +52,29 @@ public class CompanyControllerTest {
                 """;
         mockMvc.perform(post("/companies").contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(requestBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("Google"));
     }
 
     @Test
-    void should_get_company_when_given_a_valid_id() throws Exception {
-        String requestBody = """
-                {
-                   "name": "Google"
-                }
-                """;
-        mockMvc.perform(post("/companies").contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
-        mockMvc.perform(get("/companies/{id}", 1).contentType(org.springframework.http.MediaType.APPLICATION_JSON))
+    void should_get_company_and_employees_when_given_a_valid_id() throws Exception {
+        Company company = new Company();
+        company.setName("Google");
+        companyRepository.save(company);
+
+        Employee employee = new Employee();
+        employee.setName("Kate");
+        employee.setSalary(6000d);
+        employee.setAge(24);
+        employee.setGender("Female");
+        employee.setCompanyId(company.getId());
+        employeeRepository.save(employee);
+
+        mockMvc.perform(get("/companies/{id}", company.getId()).contentType(org.springframework.http.MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Google"));
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.name").value("Google"))
+                .andExpect(jsonPath("$.employees.length()").value(1));
     }
 
     @Test
@@ -68,12 +89,12 @@ public class CompanyControllerTest {
                    "name": "Alibaba"
                 }
                 """;
-        mockMvc.perform(post("/companies").contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
-        mockMvc.perform(put("/companies/{id}", 1).contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(updateBody))
+        mockMvc.perform(put("/companies/{id}", createEmployee(requestBody)).contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(updateBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("Alibaba"));
     }
+
     @Test
     void should_delete_company_when_given_a_valid_id() throws Exception {
         String requestBody = """
@@ -81,9 +102,9 @@ public class CompanyControllerTest {
                    "name": "Google"
                 }
                 """;
-        mockMvc.perform(post("/companies").contentType(org.springframework.http.MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
-        mockMvc.perform(delete("/companies/{id}", 1).contentType(org.springframework.http.MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
-        mockMvc.perform(delete("/companies/{id}", 1).contentType(org.springframework.http.MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
+        long id = createEmployee(requestBody);
+        mockMvc.perform(delete("/companies/{id}", id).contentType(org.springframework.http.MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/companies/{id}", id).contentType(org.springframework.http.MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -123,12 +144,21 @@ public class CompanyControllerTest {
         }
         //返回第二页的内容，即第三第四条
         mockMvc.perform(get("/companies")
-                .param("page", "2")
-                .param("size", "2").contentType(org.springframework.http.MediaType.APPLICATION_JSON))
+                        .param("page", "2")
+                        .param("size", "2").contentType(org.springframework.http.MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
                 .andExpect(jsonPath("$[0].name").value("Company3"))
                 .andExpect(jsonPath("$[1].name").value("Company4"));
     }
 
+
+    private long createEmployee(String requestBody) throws Exception {
+        ResultActions resultActions = mockMvc.perform(post("/companies")
+                .contentType(MediaType.APPLICATION_JSON).content(requestBody));
+
+        MvcResult mvcResult = resultActions.andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        return new ObjectMapper().readTree(contentAsString).get("id").asLong();
+    }
 }

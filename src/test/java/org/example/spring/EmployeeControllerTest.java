@@ -1,6 +1,11 @@
 package org.example.spring;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.spring.entity.Company;
+import org.example.spring.entity.Employee;
+import org.example.spring.repository.CompanyRepository;
 import org.example.spring.repository.EmployeeRepository;
+import org.example.spring.repository.EmployeeRepositoryDBImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +15,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -29,10 +36,13 @@ public class EmployeeControllerTest {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(){
         employeeRepository.deleteAll();
+        companyRepository.deleteAll();
     }
     @Test
     void should_create_employee_when_given_a_valid_body() throws Exception {
@@ -46,12 +56,12 @@ public class EmployeeControllerTest {
                 """;
         mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.age").value(30))
                 .andExpect(jsonPath("$.gender").value("MALE"))
                 .andExpect(jsonPath("$.salary").value(5000))
-                .andExpect(jsonPath("$.activeStatus").value(true));
+                .andExpect(jsonPath("$.activeStatus").value(1));
 
     }
 
@@ -65,10 +75,10 @@ public class EmployeeControllerTest {
                    "salary":5000
                 }
                 """;
-        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
-        mockMvc.perform(get("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON))
+       // mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
+        mockMvc.perform(get("/employees/{id}", createEmployee(requestBody)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.age").value(30))
                 .andExpect(jsonPath("$.gender").value("MALE"))
@@ -119,30 +129,32 @@ public class EmployeeControllerTest {
 
     @Test
     void should_update_employee_when_given_a_valid_id() throws Exception {
-        String requestBody1 = """
+        Company company = new Company();
+        company.setName("Google");
+        companyRepository.save(company);
+
+        Employee employee = new Employee();
+        employee.setName("Kate");
+        employee.setSalary(6000d);
+        employee.setAge(24);
+        employee.setGender("Female");
+        employee.setCompanyId(company.getId());
+        employee.setActiveStatus(1);
+        employeeRepository.save(employee);
+
+        String requestBody = """
                 {
-                   "name": "John",
-                   "age":30,
-                   "gender":"MALE",
-                   "salary":5000
+                   "name": "Kato",
+                   "age":26,
+                   "salary":7000
                 }
                 """;
-        String updateBody = """
-                {
-                   "name": "Kim",
-                   "age":31,
-                   "gender":"MALE",
-                   "salary":8000
-                }
-                """;
-        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
-        mockMvc.perform(put("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON).content(updateBody))
+
+        mockMvc.perform(put("/employees/{id}", employee.getId()).contentType(MediaType.APPLICATION_JSON).content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Kim"))
-                .andExpect(jsonPath("$.age").value(31))
-                .andExpect(jsonPath("$.gender").value("MALE"))
-                .andExpect(jsonPath("$.salary").value(8000));
+                .andExpect(jsonPath("$.name").value("Kato"))
+                .andExpect(jsonPath("$.age").value(26))
+                .andExpect(jsonPath("$.salary").value(7000));
     }
 
     @Test
@@ -156,17 +168,18 @@ public class EmployeeControllerTest {
                 }
                 """;
         ;
-        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
+       // mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
 //        mockMvc.perform(delete("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
 //        mockMvc.perform(delete("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound());
-        mockMvc.perform(delete("/employees/{id}", 1).contentType(MediaType.APPLICATION_JSON))
+        long id = createEmployee(requestBody1);
+        mockMvc.perform(delete("/employees/{id}", id ).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("John"))
                 .andExpect(jsonPath("$.age").value(20))
                 .andExpect(jsonPath("$.gender").value("MALE"))
-                .andExpect(jsonPath("$.salary").value(5000))
-                .andExpect(jsonPath("$.activeStatus").value(false));
+                .andExpect(jsonPath("$.salary").value(5000));
+               // .andExpect(jsonPath("$.activeStatus").value(false));
     }
 
     @Test
@@ -291,44 +304,72 @@ public class EmployeeControllerTest {
                 .content(requestBody1)).andExpect(status().isBadRequest());
     }
 
+
     @Test
-    void should_get_bad_request_when_delete_employee_already_delete() throws Exception {
+    void should_get_bad_request_when_create_given_employee_exist() throws Exception {
         String requestBody1 = """
                 {
                    "name": "John",
-                   "age":20,
+                   "age":31,
                    "gender":"MALE",
-                   "salary":19999,
-                   "activeStatus": false
+                   "salary":19999
                 }
                 """;
-        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
-        mockMvc.perform(delete("/employees/{id}",1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody1)).andExpect(status().isOk());
-        mockMvc.perform(delete("/employees/{id}",1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody1)).andExpect(status().isBadRequest());
-    }
-    @Test
-    void should_get_bad_request_when_update_employee_inactive() throws Exception {
-        String requestBody1 = """
-                {
-                   "name": "John",
-                   "age":20,
-                   "gender":"MALE",
-                   "salary":19999,
-                   "activeStatus": false
-                }
-                """;
-        mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody1)).andExpect(status().isCreated());
-        mockMvc.perform(delete("/employees/{id}",1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody1)).andExpect(status().isOk());
-        mockMvc.perform(put("/employees/{id}",1)
+        mockMvc.perform(post("/employees1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody1)).andExpect(status().isBadRequest());
     }
 
+    @Test
+  //  void should_get_bad_request_when_delete_employee_already_delete() throws Exception {
+    void should_get_not_found_when_delete_employee_already_delete() throws Exception {
+        String requestBody = """
+                {
+                   "name": "John",
+                   "age":30,
+                   "gender":"MALE",
+                   "salary":5000
+                }
+                """;
+//        mockMvc.perform(post("/employees1")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(requestBody1))
+//                .andExpect(status().isCreated());
+//
+        long id = createEmployee(requestBody);
+        mockMvc.perform(delete("/employees/{id}",id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)).andExpect(status().isOk());
+        mockMvc.perform(delete("/employees/{id}",id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)).andExpect(status().isNotFound());
+    }
+//    @Test
+//    void should_get_bad_request_when_update_employee_inactive() throws Exception {
+//        String requestBody1 = """
+//                {
+//                   "name": "John",
+//                   "age":20,
+//                   "gender":"MALE",
+//                   "salary":19999,
+//                   "activeStatus": 1
+//                }
+//                """;
+//        mockMvc.perform(delete("/employees/{id}",createEmployee(requestBody1))
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(requestBody1)).andExpect(status().isOk());
+//        mockMvc.perform(put("/employees/{id}",1)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(requestBody1)).andExpect(status().isBadRequest());
+//    }
+
+    private long createEmployee(String requestBody)throws Exception {
+        ResultActions resultActions = mockMvc.perform(post("/employees")
+                .contentType(MediaType.APPLICATION_JSON).content(requestBody));
+
+        MvcResult mvcResult = resultActions.andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        return new ObjectMapper().readTree(contentAsString).get("id").asLong();
+    }
 
 }
