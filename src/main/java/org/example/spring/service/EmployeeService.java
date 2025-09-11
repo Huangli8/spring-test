@@ -48,7 +48,7 @@ public class EmployeeService {
     public List<Employee> getEmployees(String gender, Integer page, Integer size) {
         // 1. 按性别查，不分页
         if (gender != null) {
-            return employeeRepository.findByGender(gender);
+            return employeeRepository.findByGenderOrderByAgeDesc(gender);
         }
 
         // 2. 没有分页参数，返回所有数据

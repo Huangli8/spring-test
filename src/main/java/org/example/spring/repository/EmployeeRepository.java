@@ -17,4 +17,6 @@ public interface EmployeeRepository {
     public Employee delete(Employee employee);
     public Employee update(Employee employee);
     public void deleteAll();
+
+    List<Employee> findByGenderOrderByAgeDesc(String gender);
 }

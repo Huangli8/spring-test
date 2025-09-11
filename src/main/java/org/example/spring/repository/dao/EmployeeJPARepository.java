@@ -17,4 +17,5 @@ public interface EmployeeJPARepository extends JpaRepository<Employee, Long> {
     Page<Employee> findAll(Pageable pageable);
     // 按性别查询，不分页
     List<Employee> findByGender(String gender);
+    List<Employee> findByGenderOrderByAgeDesc(String gender);
 }

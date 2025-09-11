@@ -56,4 +56,9 @@ public class EmployeeRepositoryDBImpl implements EmployeeRepository {
     public void deleteAll() {
         employeeJPARepository.deleteAll();
     }
+
+    @Override
+    public List<Employee> findByGenderOrderByAgeDesc(String gender){
+        return employeeJPARepository.findByGenderOrderByAgeDesc(gender);
+    }
 }

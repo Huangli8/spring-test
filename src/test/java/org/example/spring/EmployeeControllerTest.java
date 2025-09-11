@@ -86,11 +86,11 @@ public class EmployeeControllerTest {
     }
 
     @Test
-    void should_get_employees_when_given_gender() throws Exception {
+    void should_get_employees_when_given_gender_sort_by_age_desc() throws Exception {
         String requestBody1 = """
                 {
                    "name": "John",
-                   "age":30,
+                   "age":20,
                    "gender":"MALE",
                    "salary":5000
                 }
@@ -106,7 +106,7 @@ public class EmployeeControllerTest {
         String requestBody3 = """
                 {
                    "name": "Tim",
-                   "age":20,
+                   "age":25,
                    "gender":"MALE",
                    "salary":4000
                 }
@@ -117,14 +117,14 @@ public class EmployeeControllerTest {
         mockMvc.perform(get("/employees").param("gender", "MALE").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].name").value("John"))
-                .andExpect(jsonPath("$[0].age").value(30))
+                .andExpect(jsonPath("$[0].name").value("Tim"))
+                .andExpect(jsonPath("$[0].age").value(25))
                 .andExpect(jsonPath("$[0].gender").value("MALE"))
-                .andExpect(jsonPath("$[0].salary").value(5000))
-                .andExpect(jsonPath("$[1].name").value("Tim"))
+                .andExpect(jsonPath("$[0].salary").value(4000))
+                .andExpect(jsonPath("$[1].name").value("John"))
                 .andExpect(jsonPath("$[1].age").value(20))
                 .andExpect(jsonPath("$[1].gender").value("MALE"))
-                .andExpect(jsonPath("$[1].salary").value(4000));
+                .andExpect(jsonPath("$[1].salary").value(5000));
     }
 
     @Test
