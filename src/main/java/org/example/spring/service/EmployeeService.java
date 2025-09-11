@@ -7,6 +7,10 @@ import org.example.spring.repository.CompanyRepository;
 import org.example.spring.repository.EmployeeRepository;
 import org.example.spring.repository.EmployeeRepositoryDBImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -30,7 +34,7 @@ public class EmployeeService {
         if (exists) {
             throw new EmployeeAlreadyExistsException();
         }
-        employee.setActiveStatus(1);
+        //employee.setActiveStatus(1);
         return employeeRepository.save(employee);
     }
 
@@ -42,18 +46,24 @@ public class EmployeeService {
     }
 
     public List<Employee> getEmployees(String gender, Integer page, Integer size) {
-        List<Employee> employees = (gender == null) ? employeeRepository.findAll() : employeeRepository.findByGender(gender);
-        if (page == null || size == null) {
-            return employees;
+        // 1. 按性别查，不分页
+        if (gender != null) {
+            return employeeRepository.findByGender(gender);
         }
+
+        // 2. 没有分页参数，返回所有数据
+        if (page == null || size == null) {
+            return employeeRepository.findAll(); // 返回 List<Employee>
+        }
+
+        // 3. 分页查询，再转成 List
         if (page < 1) page = 1;
         if (size < 1) size = 10;
-        // 分页逻辑
-        int from = (page - 1) * size;
-        if (from >= employees.size()) return List.of();
-        int to = Math.min(from + size, employees.size());
-        return employees.subList(from, to);
 
+        Pageable pageable = PageRequest.of(page-1, size);
+        Page<Employee> pageResult = employeeRepository.findAllPagination(pageable);
+
+        return pageResult.getContent(); // 只取分页后的数据列表
     }
 
     public Employee updateEmployee(Long id, UpdateEmployeeReq updateEmployeeReq) {

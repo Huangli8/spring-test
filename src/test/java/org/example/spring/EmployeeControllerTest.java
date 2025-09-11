@@ -234,25 +234,56 @@ public class EmployeeControllerTest {
 
     @Test
     void should_get_employees_with_pagination_when_given_page_and_size() throws Exception {
-        for (int i = 0; i < 6; i++) {
-            String requestBody = """
-                    {"name":"Employee%1$d","age":%2$d,"gender":"MALE","salary":%3$d}""".formatted(i + 1, 20 + i, 5000 + i * 1000);
-            mockMvc.perform(post("/employees1").contentType(MediaType.APPLICATION_JSON).content(requestBody)).andExpect(status().isCreated());
-        }
-        //返回第二页的内容，即第三第四条
+        Company company = new Company();
+        company.setName("Google");
+        companyRepository.save(company);
+
+        Employee employee1 = new Employee();
+        employee1.setName("Employee1");
+        employee1.setSalary(5000d);
+        employee1.setAge(20);
+        employee1.setGender("MALE");
+        employee1.setCompanyId(company.getId());
+        employeeRepository.save(employee1);
+
+        Employee employee2 = new Employee();
+        employee2.setName("Employee2");
+        employee2.setSalary(6000d);
+        employee2.setAge(21);
+        employee2.setGender("MALE");
+        employee2.setCompanyId(company.getId());
+        employeeRepository.save(employee2);
+
+        Employee employee3 = new Employee();
+        employee3.setName("Employee3");
+        employee3.setSalary(7000d);
+        employee3.setAge(22);
+        employee3.setGender("MALE");
+        employee3.setCompanyId(company.getId());
+        employeeRepository.save(employee3);
+
+        Employee employee4 = new Employee();
+        employee4.setName("Employee4");
+        employee4.setSalary(8000d);
+        employee4.setAge(23);
+        employee4.setGender("MALE");
+        employee4.setCompanyId(company.getId());
+        employeeRepository.save(employee4);
+
+        //返回第1页的内容，即第1第2条
         mockMvc.perform(get("/employees")
-                .param("page", "2")
+                .param("page", "1")
                 .param("size", "2").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$",hasSize(2)))
-                .andExpect(jsonPath("$[0].name").value("Employee3"))
-                .andExpect(jsonPath("$[0].age").value(22))
+                .andExpect(jsonPath("$[0].name").value("Employee1"))
+                .andExpect(jsonPath("$[0].age").value(20))
                 .andExpect(jsonPath("$[0].gender").value("MALE"))
-                .andExpect(jsonPath("$[0].salary").value(7000))
-                .andExpect(jsonPath("$[1].name").value("Employee4"))
-                .andExpect(jsonPath("$[1].age").value(23))
+                .andExpect(jsonPath("$[0].salary").value(5000d))
+                .andExpect(jsonPath("$[1].name").value("Employee2"))
+                .andExpect(jsonPath("$[1].age").value(21))
                 .andExpect(jsonPath("$[1].gender").value("MALE"))
-                .andExpect(jsonPath("$[1].salary").value(8000));
+                .andExpect(jsonPath("$[1].salary").value(6000d));
     }
 
     @Test
@@ -322,27 +353,25 @@ public class EmployeeControllerTest {
 
     @Test
   //  void should_get_bad_request_when_delete_employee_already_delete() throws Exception {
-    void should_get_not_found_when_delete_employee_already_delete() throws Exception {
-        String requestBody = """
-                {
-                   "name": "John",
-                   "age":30,
-                   "gender":"MALE",
-                   "salary":5000
-                }
-                """;
-//        mockMvc.perform(post("/employees1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(requestBody1))
-//                .andExpect(status().isCreated());
-//
-        long id = createEmployee(requestBody);
-        mockMvc.perform(delete("/employees/{id}",id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)).andExpect(status().isOk());
-        mockMvc.perform(delete("/employees/{id}",id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)).andExpect(status().isNotFound());
+    void should_get_bad_request_when_delete_employee_already_delete() throws Exception {
+        Company company = new Company();
+        company.setName("Google");
+        companyRepository.save(company);
+
+        Employee employee = new Employee();
+        employee.setName("Kate");
+        employee.setSalary(6000d);
+        employee.setAge(24);
+        employee.setGender("Female");
+        employee.setCompanyId(company.getId());
+        employeeRepository.save(employee);
+
+        mockMvc.perform(delete("/employees/{id}",employee.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/employees/{id}",employee.getId())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
     @Test
     void should_get_bad_request_when_update_employee_inactive() throws Exception {
