@@ -36,8 +36,8 @@ public class EmployeeRepositoryDBImpl implements EmployeeRepository {
 
     @Override
     public Employee delete(Employee employee) {
-        employeeJPARepository.delete(employee);
-        return employee;
+        employee.setActiveStatus(0);
+        return employeeJPARepository.save(employee);
     }
 
     @Override

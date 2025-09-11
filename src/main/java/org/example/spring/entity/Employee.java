@@ -11,6 +11,8 @@ public class Employee {
     private Integer age;
     private Double salary;
     private String gender;
+
+    @Column(name = "active_status", columnDefinition = "TINYINT")
     private Integer activeStatus;
 
     @Column(name = "company_id")
@@ -59,6 +61,7 @@ public class Employee {
     public Integer getActiveStatus() {
         return activeStatus;
     }
+
 
     public void setActiveStatus(Integer activeStatus) {
         this.activeStatus = activeStatus;

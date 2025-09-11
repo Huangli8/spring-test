@@ -344,24 +344,32 @@ public class EmployeeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)).andExpect(status().isNotFound());
     }
-//    @Test
-//    void should_get_bad_request_when_update_employee_inactive() throws Exception {
-//        String requestBody1 = """
-//                {
-//                   "name": "John",
-//                   "age":20,
-//                   "gender":"MALE",
-//                   "salary":19999,
-//                   "activeStatus": 1
-//                }
-//                """;
-//        mockMvc.perform(delete("/employees/{id}",createEmployee(requestBody1))
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(requestBody1)).andExpect(status().isOk());
-//        mockMvc.perform(put("/employees/{id}",1)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(requestBody1)).andExpect(status().isBadRequest());
-//    }
+    @Test
+    void should_get_bad_request_when_update_employee_inactive() throws Exception {
+        Company company = new Company();
+        company.setName("Google");
+        companyRepository.save(company);
+
+        Employee employee = new Employee();
+        employee.setName("Kate");
+        employee.setSalary(6000d);
+        employee.setAge(24);
+        employee.setGender("Female");
+        employee.setCompanyId(company.getId());
+        employee.setActiveStatus(0);
+        employeeRepository.save(employee);
+
+        String requestBody = """
+                {
+                   "name": "Kato",
+                   "age":26,
+                   "salary":7000
+                }
+                """;
+
+        mockMvc.perform(put("/employees/{id}", employee.getId()).contentType(MediaType.APPLICATION_JSON).content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
 
     private long createEmployee(String requestBody)throws Exception {
         ResultActions resultActions = mockMvc.perform(post("/employees")
