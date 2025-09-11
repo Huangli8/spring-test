@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class CompanyController {
@@ -26,8 +26,10 @@ public class CompanyController {
         return companyService.getCompanies(page, size);
     }
     @GetMapping("/companies/{id}")
-    public Company getCompanyById(@PathVariable long id){
-        return companyService.getCompany(id);
+    public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
+        return companyService.getCompany(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/companies")
@@ -36,8 +38,8 @@ public class CompanyController {
     }
 
     @PutMapping("companies/{id}")
-    public ResponseEntity<Company> updateCompany(@PathVariable long id, @RequestBody Company company){
-        Company companyToUpdate = companyService.updateCompany(id, company);
+    public ResponseEntity<Optional<Company>> updateCompany(@PathVariable long id, @RequestBody Company company){
+        Optional<Company> companyToUpdate = companyService.updateCompany(id, company);
         return ResponseEntity.ok(companyToUpdate);
     }
 

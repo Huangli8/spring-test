@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyService {
@@ -29,24 +30,25 @@ public class CompanyService {
         return companies.subList(from, to);
     }
 
-    public Company getCompany(long id){
+    public Optional<Company> getCompany(long id){
         return companyRepository.findById(id);
     }
 
     public Company createCompany(Company company){
-        company.setId(companyRepository.getSize()+1);
         companyRepository.save(company);
         return company;
     }
-    public Company updateCompany(long id, Company company){
-        Company companyToUpdate = companyRepository.findById(id);
-        if(companyToUpdate!=null){
-            companyToUpdate.setName(company.getName());
-        }
+    public Optional<Company> updateCompany(long id, Company company){
+        Optional<Company> companyToUpdate = companyRepository.findById(id);
+        companyToUpdate.ifPresent(value -> value.setName(company.getName()));
         return companyToUpdate;
     }
 
     public boolean deleteCompany(long id){
-        return companyRepository.delete(id);
+        if(companyRepository.existsById(id)){
+            companyRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }
